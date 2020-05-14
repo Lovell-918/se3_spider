@@ -74,7 +74,11 @@ def ieee_all_info(url):
 
     if res is not None:
         pattern = re.compile(ur'metadata={.*};')
-        content = json.loads(pattern.search(res.text).group()[9:-1])
+        re_con = pattern.search(res.text)
+        if re_con is None:
+            content = ""
+        else:
+            content = json.loads(re_con.group()[9:-1])
     else:
         content = ""
     if 'title' in content:
@@ -496,7 +500,11 @@ def ieee_info(url):
 
     if res is not None:
         pattern = re.compile(ur'metadata={.*};')
-        content = json.loads(pattern.search(res.text).group()[9:-1])
+        re_con = pattern.search(res.text)
+        if re_con is None:
+            content = ""
+        else:
+            content = json.loads(re_con.group()[9:-1])
     else:
         content = ""
     # if 'title' in content:
