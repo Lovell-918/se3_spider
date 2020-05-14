@@ -8,7 +8,6 @@ from lxml import html
 
 from bs4 import BeautifulSoup
 import random
-import time
 import urllib3
 
 ip_random = -1
@@ -312,7 +311,7 @@ def filter_refrence(refence, csv_write):
             if res is not None:
                 ehtml = etree.HTML(res.text)
                 result = ehtml.xpath('//*[@id="b_results"]/li[%s]/h2/a/@href' % 1)
-                if result and '/academic/' in result[0]:
+                if result and result[0].startswith('/academic/profile?id='):
                     paper_url = 'https://cn.bing.com' + result[0]
 
                     # ip_rand, proxies = get_proxie(ip_random)
@@ -334,7 +333,7 @@ def filter_refrence(refence, csv_write):
                     # ip_random = ip_random
 
                     paper_res = requests.get(url=paper_url, headers=headers, verify=False)
-                    time.sleep(1)
+
                     paper_ehtml = etree.HTML(paper_res.text)
                     trs = paper_ehtml.xpath('//*[@class="aca_base"]/li[@class="aca_title"]')
                     document_title = trs[0].text
