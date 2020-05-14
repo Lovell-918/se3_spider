@@ -8,6 +8,6 @@
 
 最终产生的XXX_ref.json为引文关系数据，XXX_complete_ref.csv为全部引文详细信息数据，
 
-其中CSV文件由于是UTF-8编码格式可能出现excel打卡查看不了内容的情况，
+其中CSV文件由于是UTF-8编码格式可能出现excel打开查看不了内容的情况，
 
 这时先用notepad++打开后再用excel打开即可（原因以及其他解决方式自行搜索）
