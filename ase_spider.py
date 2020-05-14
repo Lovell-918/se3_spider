@@ -26,6 +26,7 @@ etree = html.etree
 USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/62.0.3202.94 ' \
              'Safari/537.36 '
 
+# TODO 修改这里为自己想要存储爬取数据导出的根路径，建议不要出现中文
 base_path = "C:\\Users\\laiba\\Documents\\temp\\"
 
 urllib3.disable_warnings()
@@ -619,7 +620,7 @@ def get_all_link_in_csv(csv_path):
 
 
 if __name__ == '__main__':
-    # ieee_parse("C:\\Users\\laiba\\Documents\\temp\\ase13_15_16_17_19.csv")
+    # TODO 修改这里为自己存储数据源的文件位置，建议路径里不要出现中文
     get_all_link_in_csv("C:\\Users\\laiba\\Documents\\temp\\icse15_16_17_18_19.csv")
     get_all_link_in_csv("C:\\Users\\laiba\\Documents\\temp\\ase13_15_16_17_19.csv")
     ieee_parse("C:\\Users\\laiba\\Documents\\temp\\ase13_15_16_17_19.csv")
