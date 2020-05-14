@@ -9,6 +9,7 @@ from lxml import html
 from bs4 import BeautifulSoup
 import random
 import time
+import urllib3
 
 ip_random = -1
 article_tag_list = []
@@ -27,10 +28,7 @@ USER_AGENT = 'Mozilla/5.0 (Windows NT 10.0; WOW64) AppleWebKit/537.36 (KHTML, li
 
 base_path = "C:\\Users\\laiba\\Documents\\temp\\"
 
-
-# requests.adapters.DEFAULT_RETRIES = 5
-# s = requests.session()
-# s.keep_alive = False
+urllib3.disable_warnings()
 
 
 def get_keywords(keywords):
@@ -305,7 +303,7 @@ def filter_refrence(refence, csv_write):
             # ip_random = ip_rand
             url = 'https://cn.bing.com/academic/?q=' + scholar_link
             params = {"mkt": "zh-CN", 'first': 1}
-            res = requests.get(url=url, params=params, headers=headers)
+            res = requests.get(url=url, params=params, headers=headers, verify=False)
             if res is not None:
                 ehtml = etree.HTML(res.text)
                 result = ehtml.xpath('//*[@id="b_results"]/li[%s]/h2/a/@href' % 1)
@@ -330,7 +328,7 @@ def filter_refrence(refence, csv_write):
                     #         request_status = paper_res.status_code
                     # ip_random = ip_random
 
-                    paper_res = requests.get(url=paper_url, headers=headers)
+                    paper_res = requests.get(url=paper_url, headers=headers, verify=False)
                     time.sleep(1)
                     paper_ehtml = etree.HTML(paper_res.text)
                     trs = paper_ehtml.xpath('//*[@class="aca_base"]/li[@class="aca_title"]')
