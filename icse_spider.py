@@ -286,148 +286,115 @@ def filter_refrence(refence, csv_write):
             else:
                 scholar_link = title.replace(" ", "+")
             headers = {'User-Agent': USER_AGENT}
-            # url = 'https://cn.bing.com/academic/?q=' + scholar_link
-            # params = {"mkt": "zh-CN", 'first': 1}
-            # ip_rand, proxies = get_proxie(ip_random)
-            # try:
-            #     res = requests.get(url=url, params=params, headers=headers, proxies=proxies, timeout=3)
-            # except:
-            #     request_status = 500
-            # else:
-            #     request_status = res.status_code
-            # while request_status != 200:
-            #     ip_random = -1
-            #     ip_rand, proxies = get_proxie(ip_random)
-            #     try:
-            #         res = requests.get(url=url, params=params, headers=headers, proxies=proxies, timeout=3)
-            #     except:
-            #         request_status = 500
-            #     else:
-            #         request_status = res.status_code
-            # ip_random = ip_rand
             url = 'https://cn.bing.com/academic/?q=' + scholar_link
             params = {"mkt": "zh-CN", 'first': 1}
-            res = requests.get(url=url, params=params, headers=headers, verify=False)
+            try:
+                res = requests.get(url=url, params=params, headers=headers, verify=False, timeout=10)
+            except:
+                res = None
             if res is not None:
                 ehtml = etree.HTML(res.text)
                 result = ehtml.xpath('//*[@id="b_results"]/li[%s]/h2/a/@href' % 1)
                 if result and result[0].startswith('/academic/profile?id='):
                     paper_url = 'https://cn.bing.com' + result[0]
-
-                    # ip_rand, proxies = get_proxie(ip_random)
-                    # try:
-                    #     paper_res = requests.get(url=paper_url, headers=headers, proxies=proxies, timeout=3)
-                    # except:
-                    #     request_status = 500
-                    # else:
-                    #     request_status = paper_res.status_code
-                    # while request_status != 200:
-                    #     ip_random = -1
-                    #     ip_rand, proxies = get_proxie(ip_random)
-                    #     try:
-                    #         paper_res = requests.get(url=paper_url, headers=headers, proxies=proxies, timeout=3)
-                    #     except:
-                    #         request_status = 500
-                    #     else:
-                    #         request_status = paper_res.status_code
-                    # ip_random = ip_rand
-
-                    paper_res = requests.get(url=paper_url, headers=headers, verify=False)
-
-                    paper_ehtml = etree.HTML(paper_res.text)
-                    trs = paper_ehtml.xpath('//*[@class="aca_base"]/li[@class="aca_title"]')
-                    document_title = trs[0].text
-                    authors = list()
-                    abstract = ''
-                    bing_terms = list()
-                    publication_year = ''
-                    start_page = ''
-                    end_page = ''
-                    article_citation_count = ''
-                    publisher = ''
-                    for i in range(1, 12):
-                        labels = paper_ehtml.xpath(
-                            '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                  '@class="b_hPanel"]/span[@class="aca_labels"]/span/text()')
-                        if labels:
-                            label = labels[0].encode('utf-8')
+                    try:
+                        paper_res = requests.get(url=paper_url, headers=headers, verify=False, timeout=10)
+                    except:
+                        paper_res = None
+                    if paper_res is not None:
+                        paper_ehtml = etree.HTML(paper_res.text)
+                        trs = paper_ehtml.xpath('//*[@class="aca_base"]/li[@class="aca_title"]')
+                        if trs is not None:
+                            document_title = trs[0].text
                         else:
-                            break
-                        if label == '作　　者':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div[@class="aca_desc '
-                                                                                                      'b_snippet"]/span/a')
-                            for at in trs:
-                                au = at.text
-                                ja_aa = dict(
-                                    author=au,
-                                    affiliation='NA'
-                                )
-                                authors.append(ja_aa)
-                        elif label == '摘　　要':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div[@class="aca_desc '
-                                                                                                      'b_snippet"]/span/span/@title')
-                            if trs:
-                                abstract = trs[0]
-                        elif label == '研究领域':
-                            bing_terms = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/span/ '
-                                                                                                      'a/text()')
-                        elif label == '发表日期':
-                            trs = paper_ehtml.xpath(
+                            document_title = title
+                        authors = list()
+                        abstract = ''
+                        bing_terms = list()
+                        publication_year = ''
+                        start_page = ''
+                        end_page = ''
+                        article_citation_count = ''
+                        publisher = ''
+                        for i in range(1, 12):
+                            labels = paper_ehtml.xpath(
                                 '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
-                            if trs:
-                                publication_year = trs[0]
-                        elif label == '会 　议' or label == '期　　刊':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/a/text()')
-                            if trs:
-                                publisher = trs[0]
-                        elif label == '页码范围':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
-                            if trs:
-                                pages = trs[0].split('-')
-                                start_page = pages[0]
-                                if len(pages) == 1:
-                                    end_page = start_page
-                                else:
-                                    end_page = pages[1]
-                        elif label == '被 引 量':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
-                            if trs:
-                                article_citation_count = trs[0]
-                        elif label == 'DOI':
-                            trs = paper_ehtml.xpath(
-                                '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
-                                                                                                      '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
-                            if trs:
-                                doi = trs[0]
-                else:
-                    continue
-                paper = dict(
-                    document_title=document_title, authors=authors, publication_title='',
-                    date_added_to_xplore='', publication_year=publication_year, volume='',
-                    issue='', start_page=start_page, end_page=end_page, abstract=abstract, issn='', isbns='',
-                    doi=doi, funding_information='', pdf_link='',
-                    authors_keywords=list(), ieee_terms=list(), inspec_controlled_terms=list(),
-                    inspec_non_controlled_terms=list(), mesh_terms=list(), bing_terms=bing_terms,
-                    article_citation_count=article_citation_count, reference_count='', licence='',
-                    online_date='', issue_date='', meeting_date='', publisher=publisher,
-                    document_identifier=''
-                )
-                csv_write.writerow([text.encode("utf8") for text in trans_paper_row(paper)])
-            else:
-                continue
+                                                                                                      '@class="b_hPanel"]/span[@class="aca_labels"]/span/text()')
+                            if labels:
+                                label = labels[0].encode('utf-8')
+                            else:
+                                break
+                            if label == '作　　者':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div[@class="aca_desc '
+                                                                                                          'b_snippet"]/span/a')
+                                for at in trs:
+                                    au = at.text
+                                    ja_aa = dict(
+                                        author=au,
+                                        affiliation='NA'
+                                    )
+                                    authors.append(ja_aa)
+                            elif label == '摘　　要':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div[@class="aca_desc '
+                                                                                                          'b_snippet"]/span/span/@title')
+                                if trs:
+                                    abstract = trs[0]
+                            elif label == '研究领域':
+                                bing_terms = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div['
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/span/ '
+                                                                                                          'a/text()')
+                            elif label == '发表日期':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
+                                if trs:
+                                    publication_year = trs[0]
+                            elif label == '会 　议' or label == '期　　刊':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/a/text()')
+                                if trs:
+                                    publisher = trs[0]
+                            elif label == '页码范围':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
+                                if trs:
+                                    pages = trs[0].split('-')
+                                    start_page = pages[0]
+                                    if len(pages) == 1:
+                                        end_page = start_page
+                                    else:
+                                        end_page = pages[1]
+                            elif label == '被 引 量':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
+                                if trs:
+                                    article_citation_count = trs[0]
+                            elif label == 'DOI':
+                                trs = paper_ehtml.xpath(
+                                    '//*[@class="aca_main"]/ul[@class="b_vList b_divsec"]/li[' + str(i) + ']/div[ '
+                                                                                                          '@class="b_hPanel"]/span[@class="aca_content"]/div/text()')
+                                if trs:
+                                    doi = trs[0]
+                        paper = dict(
+                            document_title=document_title, authors=authors, publication_title='',
+                            date_added_to_xplore='', publication_year=publication_year, volume='',
+                            issue='', start_page=start_page, end_page=end_page, abstract=abstract, issn='', isbns='',
+                            doi=doi, funding_information='', pdf_link='',
+                            authors_keywords=list(), ieee_terms=list(), inspec_controlled_terms=list(),
+                            inspec_non_controlled_terms=list(), mesh_terms=list(), bing_terms=bing_terms,
+                            article_citation_count=article_citation_count, reference_count='', licence='',
+                            online_date='', issue_date='', meeting_date='', publisher=publisher,
+                            document_identifier=''
+                        )
+                        csv_write.writerow([text.encode("utf8") for text in trans_paper_row(paper)])
         sin = dict(
             title=title,
             link=link,
@@ -506,52 +473,19 @@ def ieee_info(url):
             content = json.loads(re_con.group()[9:-1])
     else:
         content = ""
-    # if 'title' in content:
-    #     title = content['title']
-    # else:
-    #     title = ''
 
     if 'authors' in content:
         authors = content['authors']
     else:
         authors = list()
 
-    # if 'abstract' in content:
-    #     abstract = content['abstract']
-    # else:
-    #     abstract = ''
-    #
-    # if 'publicationTitle' in content:
-    #     publication = content['publicationTitle']
-    # else:
-    #     publication = ''
-    #
-    # if 'keywords' in content:
-    #     keywords = get_keywords(content['keywords'])
-    # else:
-    #     keywords = list()
-    #
-    # if 'doi' in content:
-    #     doi = content['doi']
-    # else:
-    #     doi = ''
-
     paper = dict(
-        # title=title,
         authors=authors
-        # abstract=abstract,
-        # publication=publication,
-        # keywords=keywords
-        # doi=doi
     )
     return paper
 
 
 def ieee_parse(csv_path):
-    # ase
-    # ase_res = open(base_path + 'ase_res.json', 'a')
-    # icse
-    # icse_complete_res = open(base_path + 'icse_complete_ref.json', 'a')
     icse_res = open(base_path + 'icse_ref.json', 'a')
     my_f = open(base_path + 'icse_complete_ref.csv', 'ab')
     csv_write = csv.writer(my_f)
@@ -571,13 +505,6 @@ def ieee_parse(csv_path):
             publish_title = row[3]
             pdf_link = str(row[15])
             link_num = pdf_link[pdf_link.rfind('=') + 1:]
-
-            # if str(link_num) == '8952245':
-            #     flag = True
-
-            # if flag is False:
-            #     continue
-
             url = "https://ieeexplore.ieee.org/document/" + link_num
 
             print url
@@ -587,19 +514,11 @@ def ieee_parse(csv_path):
             if len(paper['authors']) != 0:
                 single = dict()
                 single['pdf_link'] = u''.join(pdf_link).encode('utf-8').strip()
-                # single['authors'] = paper['authors']
-                # single['abstract'] = u''.join(paper['abstract']).encode('utf-8').strip()
-                # single['keywords'] = u''.join(paper['keywords']).encode('utf-8').strip()
-                # single['publication'] = u''.join(paper['publication']).encode('utf-8').strip()
-                # single['doi'] = u''.join(paper['doi']).encode('utf-8').strip()
                 ref = get_reference(ref_url, link_num, csv_write)
                 single['ref'] = ref
 
                 res.append(json.dumps(single))
 
-                # ase_res.write(json.dumps(single) + '\n')
-                # ase_res.flush()
-                # ase_res.close()
                 icse_res.write(json.dumps(single) + '\n')
                 icse_res.flush()
     icse_res.close()
