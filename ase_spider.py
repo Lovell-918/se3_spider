@@ -516,7 +516,6 @@ def ieee_parse(csv_path):
                'INSPEC Non-Controlled Terms', 'Mesh_Terms', 'Bing Terms', 'Article Citation Count', 'Reference Count',
                'License', 'Online Date', 'Issue Date', 'Meeting Date', 'Publisher', 'Document Identifier']
     csv_write.writerow(csv_row)
-    is_con = True
     with open(csv_path) as f:
         rows = csv.reader(f)
         headers = next(rows)
@@ -524,10 +523,6 @@ def ieee_parse(csv_path):
             publish_title = row[3]
             pdf_link = str(row[15])
             link_num = pdf_link[pdf_link.rfind('=') + 1:]
-            if link_num != '7582809' and is_con:
-                continue
-            else:
-                is_con = False
             url = "https://ieeexplore.ieee.org/document/" + link_num
 
             print url
