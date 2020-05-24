@@ -9,6 +9,7 @@ from lxml import html
 from bs4 import BeautifulSoup
 import random
 import urllib3
+import time
 
 ip_random = -1
 article_tag_list = []
@@ -235,7 +236,6 @@ def trans_paper_row(paper):
 
 def filter_refrence(refence, csv_write):
     global csv_links
-    # global ip_random
 
     nRe = json.dumps(refence)
     arrayRef = json.loads(nRe)
@@ -492,17 +492,24 @@ def ieee_parse(csv_path):
 
     res = []
 
+    need_nums = input("请输入想要获取多少篇文章的引文数：10，20，30...812：")
+    skin = 812 / need_nums
+    true_nums = 0
     csv_row = ['Document Title', 'Authors', 'Author Affiliations', 'Publication Title', 'Date Added To Xplore',
                'Publication Year', 'Volume', 'Issue', 'Start Page', 'End Page', 'Abstract', 'ISSN', 'ISBNs', 'DOI',
                'Funding Information', 'PDF Link', 'Author Keywords', 'IEEE Terms', 'INSPEC Controlled Terms',
                'INSPEC Non-Controlled Terms', 'Mesh_Terms', 'Bing Terms', 'Article Citation Count', 'Reference Count',
                'License', 'Online Date', 'Issue Date', 'Meeting Date', 'Publisher', 'Document Identifier']
     csv_write.writerow(csv_row)
+    begin_time = int(round(time.time() * 1000))
     with open(csv_path) as f:
         rows = csv.reader(f)
-        headers = next(rows)
+        temp_skin = 1
         for row in rows:
-            publish_title = row[3]
+            if temp_skin < skin:
+                temp_skin += 1
+                continue
+            temp_skin = 1
             pdf_link = str(row[15])
             link_num = pdf_link[pdf_link.rfind('=') + 1:]
             url = "https://ieeexplore.ieee.org/document/" + link_num
@@ -510,7 +517,7 @@ def ieee_parse(csv_path):
             print url
             paper = ieee_info(url)
             ref_url = "https://ieeexplore.ieee.org/rest/document/" + link_num + "/references"
-
+            one_time = int(round(time.time() * 1000))
             if len(paper['authors']) != 0:
                 single = dict()
                 single['pdf_link'] = u''.join(pdf_link).encode('utf-8').strip()
@@ -521,8 +528,15 @@ def ieee_parse(csv_path):
 
                 icse_res.write(json.dumps(single) + '\n')
                 icse_res.flush()
+            one_time_end = int(round(time.time() * 1000))
+            print("爬取" + url + "的引文所花时间为%d秒" % (int((one_time_end - one_time) / 1000)))
+            true_nums += 1
+            if true_nums == need_nums:
+                break
     icse_res.close()
     my_f.close()
+    end_time = int(round(time.time() * 1000))
+    print("所耗总时间为：%d 秒" % (int((end_time - begin_time) / 1000)))
 
 
 def format_reference(ref):
